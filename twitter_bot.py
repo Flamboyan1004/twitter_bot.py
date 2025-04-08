@@ -4,12 +4,11 @@ import datetime
 import json
 from random import choice
 
-# ===== CONFIGURATION =====
-print("\n=== TWITTER BOT STARTED ===")
-print("UTC Time:", datetime.datetime.utcnow().strftime("%H:%M"))
-print("WIB Time:", (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%H:%M"))
+print("\n=== BOT TWITTER DIMULAI ===")
+print("UTC:", datetime.datetime.utcnow().strftime("%H:%M"))
+print("WIB:", (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%H:%M"))
 
-# 1. Authentication
+# Autentikasi
 try:
     client = tweepy.Client(
         consumer_key=os.environ["API_KEY"],
@@ -18,17 +17,17 @@ try:
         access_token_secret=os.environ["ACCESS_TOKEN_SECRET"]
     )
     user = client.get_me()
-    print(f"🔑 Connected as @{user.data.username}")
+    print(f"🔑 Login sebagai @{user.data.username}")
 except Exception as e:
-    print(f"❌ Connection failed: {e}")
+    print(f"❌ Gagal login: {e}")
     exit()
 
-# ===== ANTI-DUPLICATION SYSTEM =====
-def save_last_post(time_key, content):
+# Anti duplikat
+def save_post(time, content):
     with open('last_post.json', 'w') as f:
-        json.dump({"time": time_key, "content": content}, f)
+        json.dump({"time": time, "content": content}, f)
 
-def load_last_post():
+def load_post():
     try:
         with open('last_post.json', 'r') as f:
             data = json.load(f)
@@ -36,75 +35,59 @@ def load_last_post():
     except:
         return None, None
 
-# ===== MESSAGE VARIATIONS =====
-VARIATIONS = {
-    "greeting": ["✨", "🌸", "💫", "🌙", "☀️"],
-    "signature": ["\n\n#Day", "\n\nSemangat!", "\n\nBest regards~"]
+# Variasi pesan
+EMOJI = ["✨", "🌸", "💫", "🌙", "☀️"]
+PROMOSI = [
+    " cek pricelist di bio yaa!",
+    " ready akun murah lohh",
+    " kami ridii akun premium!",
+    " cek WA di bio untuk info lengkap"
+]
+
+# Jadwal UTC (WIB = UTC+7) dengan konten promosi
+JADWAL = {
+    "05:00": "1READY AMAZON PRIME VIDEO" + choice(PROMOSI),
+    "06:30": "Selamat siang! Sudah makan siang belum? aku READY NETFLIX lohh" + choice(PROMOSI),
+    "08:00": "Sore-sore enaknya ngapain ya? nonton viu ga sii?" + choice(PROMOSI),
+    "08:45": "Menu makan malam apa hari ini? makan sambil nonton iqiyi" + choice(PROMOSI),
+    "09:15": "Bosen nonton netplixx? move ke vidio keknya seruu" + choice(PROMOSI),
+    "11:00": "Malam minggu nih! Nonton Disney+ Hotstar yuk!" + choice(PROMOSI),
+    "12:45": "1READY HBO GO lengkap semua season!" + choice(PROMOSI),
+    "13:30": "Waktunya me-time! Mau nonton apa nih? Kami ready semua platform loh" + choice(PROMOSI),
+    "14:50": "Sebelum tidur nonton dulu yuk! Ada yang mau coba MOLA TV?" + choice(PROMOSI),
+    "15:00": "1READY WE TV UNTUK DRAMA LOVERSS!" + choice(PROMOSI),
+    "16:30": "Masih bangun nih? Yuk nonton U-NEXT biar ga ngantuk!" + choice(PROMOSI),
+    "18:00": "1READY APPLE TV+ FILM BARU TERUS!" + choice(PROMOSI),
+    "19:30": "Jangan lupa istirahat! Sambil nonton Crunchyroll yuk!" + choice(PROMOSI),
+    "20:00": "Off dulu gais! Pesan akun bisa via WA di bio ya!"
 }
 
-# ===== TWEET SCHEDULE (UTC) =====
-TWEET_SCHEDULE = {
-    "05:00": "Selamat siang! Sudah makan siang belum?",
-    "06:30": "Waktunya ngopi dulu!",
-    "08:00": "Selamat sore! Aktivitas hari ini bagaimana?",
-    "08:45": "Sore-sore enaknya ngapain ya?",
-    "09:15": "Ngabuburit online yuk!",
-    "11:00": "Sunset lovers! Lihat matahari terbenam hari ini?",
-    "12:45": "Malam minggu nih! Ada rencana seru?",
-    "13:30": "Waktunya dinner! Menu spesial apa malam ini?",
-    "14:50": "Sebelum tidur, yuk refleksi hari ini!",
-    "15:00": "Waktunya me-time! Mau nonton apa?",
-    "16:30": "Halo night owls! Masih bangun?",
-    "18:00": "Pagi-pagi buta... Sudah bangun?",
-    "19:30": "Jangan lupa minum air putih ya!",
-    "20:00": "Off dulu, besok lanjut lagi!"
-}
+# Proses posting
+waktu_sekarang = datetime.datetime.utcnow()
+terposting = False
+waktu_terakhir, konten_terakhir = load_post()
 
-# ===== TWEET POSTING =====
-current_time = datetime.datetime.utcnow()
-posted = False
-last_time, last_content = load_last_post()
-
-for schedule_time, base_message in TWEET_SCHEDULE.items():
-    schedule_hour, schedule_min = map(int, schedule_time.split(":"))
+for jadwal, pesan in JADWAL.items():
+    jam, menit = map(int, jadwal.split(":"))
     
-    # Check time with 7-minute window (matches 15-minute cron)
-    if (current_time.hour == schedule_hour and 
-        abs(current_time.minute - schedule_min) <= 7):
+    if (waktu_sekarang.hour == jam and 
+        abs(waktu_sekarang.minute - menit) <= 7):
         
-        # Create message with variations
-        emoji = choice(VARIATIONS["greeting"])
-        message = f"{base_message} {emoji}"
+        pesan_baru = f"{pesan} {choice(EMOJI)}"
         
-        if datetime.datetime.utcnow().weekday() < 5:
-            message += choice(VARIATIONS["signature"])
-        
-        # Check for duplicates
-        if last_time != schedule_time or last_content != message:
+        if waktu_terakhir != jadwal or konten_terakhir != pesan_baru:
             try:
-                response = client.create_tweet(text=message)
-                save_last_post(schedule_time, message)
-                wib_time = (datetime.datetime.strptime(schedule_time, "%H:%M") + 
-                           datetime.timedelta(hours=7)).strftime("%H:%M")
-                print(f"✅ Tweet sent [{schedule_time} UTC/{wib_time} WIB]")
-                print(f"📝 Content: {message[:60]}...")
-                posted = True
+                client.create_tweet(text=pesan_baru)
+                save_post(jadwal, pesan_baru)
+                waktu_wib = (datetime.datetime.strptime(jadwal, "%H:%M") + 
+                            datetime.timedelta(hours=7)).strftime("%H:%M")
+                print(f"✅ Berhasil posting [{jadwal} UTC/{waktu_wib} WIB]")
+                print(f"📝 Isi: {pesan_baru[:60]}...")
+                terposting = True
                 break
-            except tweepy.TweepyException as e:
-                print(f"❌ Failed to post: {str(e)[:100]}...")
-                if "duplicate" in str(e):
-                    print("⚠️ Trying alternative...")
-                    new_emoji = choice([e for e in VARIATIONS["greeting"] if e != emoji])
-                    alt_message = f"{base_message} {new_emoji}"
-                    try:
-                        client.create_tweet(text=alt_message)
-                        save_last_post(schedule_time, alt_message)
-                        print("✅ Alternative sent!")
-                        posted = True
-                        break
-                    except Exception as alt_e:
-                        print(f"❌ Failed to send alternative: {alt_e}")
+            except Exception as e:
+                print(f"❌ Gagal: {str(e)[:100]}")
 
-if not posted:
-    current_wib = (current_time + datetime.timedelta(hours=7)).strftime("%H:%M")
-    print(f"⏳ No scheduled posts (UTC: {current_time.strftime('%H:%M')} | WIB: {current_wib})")
+if not terposting:
+    waktu_wib = (waktu_sekarang + datetime.timedelta(hours=7)).strftime("%H:%M")
+    print(f"⏳ Tidak ada jadwal (UTC: {waktu_sekarang.strftime('%H:%M')} | WIB: {waktu_wib})")
