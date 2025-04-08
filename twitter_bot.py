@@ -35,12 +35,11 @@ def load_last_post():
 
 # ===== JADWAL TWEET (UTC) =====
 TWEET_SCHEDULE = {
-    # Waktu UTC (WIB = UTC+7)
-    "06:30": "aku on ya gaiss, yang mau order apk premm ridii, cek di bioo",          # 13:30 WIB
-    "08:00": "selamat sore semuaa udah nonton netflix belum?",                        # 15:00 WIB
-    "10:00": "aku open ress, dm untuk cek harga ya gaiss",                            # 17:00 WIB
-    "16:00": "selamat malam, ngapain ajaa ga tidurr nii?",                           # 23:00 WIB
-    "17:00": "playlist ada di link bio akuu yaa, murcee bangett koo"                  # 00:00 WIB
+    "06:30": "aku on ya gaiss, yang mau order apk premm ridii, cek di bioo",
+    "08:00": "selamat sore semuaa udah nonton netflix belum?",
+    "10:00": "aku open ress, dm untuk cek harga ya gaiss",
+    "16:00": "selamat malam, ngapain ajaa ga tidurr nii?",
+    "17:00": "playlist ada di link bio akuu yaa, murcee bangett koo"
 }
 
 # ===== POSTING TWEET =====
@@ -66,4 +65,12 @@ for schedule_time, message in TWEET_SCHEDULE.items():
                 print(f"❌ Gagal posting: {e}")
 
 if not posted:
-    print(f"⏳ Tidak ada jadwal (UTC: {current_time.strftime('%H:%M')})")
+    next_schedule = min(
+        (k for k in TWEET_SCHEDULE.keys() 
+         if datetime.datetime.strptime(k, "%H:%M") > current_time),
+        default=None
+    )
+    status_msg = f"⏳ Tidak ada jadwal (UTC: {current_time.strftime('%H:%M')})"
+    if next_schedule:
+        status_msg += f" | Jadwal berikutnya: {next_schedule} UTC"
+    print(status_msg)
