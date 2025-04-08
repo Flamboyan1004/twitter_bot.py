@@ -42,6 +42,10 @@ TWEET_SCHEDULE = {
     "08:00": "Selamat sore gaiss! Aktivitas hari ini udah sampai mana nih? 😊",  # 15:00 WIB
     "08:45": "Sore-sore gini enaknya ngapain ya? Ada yang mau rekomendasiin series atau lagu?",  # 15:45 WIB
     "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini? 🍵",  # 16:15 WIB
+    "11:00": "Hai sunset lovers! Udah lihat matahari terbenam hari ini? 💛",  # 18:00 WIB
+    "12:45": "Malam uyyy! Ada yang punya rencana seru malam ini? 🎉",  # 19:45 WIB
+    "13:30": "Waktunya dinner! Menu spesial malam ini apa nih? �🥘",  # 20:30 WIB
+    "14:50": "Sebelum tidur, yuk refleksiin hari ini! Hal paling berkesan apa hari ini? 🌙✨",  # 21:50 WIB
     "15:00": "Waktunya me-time! Malam ini ada yang mau nonton apa atau main game apa? 🎮🍿",  # 22:00 WIB
     "16:30": "Halo night owls! Ada yang masih bangun? Aku open order sampai jam 3 pagi nih 😊",  # 23:30 WIB
     "18:00": "Pagi-pagi buta yang sepi... Ada yang udah bangun buat sahur atau kerja shift malam? 🌙",  # 01:00 WIB
