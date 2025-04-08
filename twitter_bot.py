@@ -62,11 +62,11 @@ CONTENT_POOL = {
         "Ada promo khusus hari ini cek WA di bio"
     ],
     "organic": [
-        "Sore-sore enaknya nonton apa nih? Ada rekomendasi?",
-        "Yang lagi WFH, break dulu yuk! Lagi ngopi sambil nonton apa?",
-        "Film terakhir yang bikin kamu terharu apa?",
-        "Recommend drama Korea terbaik dong!",
-        "Ngabuburitnya sambil nonton apa nih?"
+        "kalian kalo lagi break biasanya ngapain",
+        "kalian lagi nonton apaa best?",
+        "Spill Film terakhir yang bikin terharu",
+        "aku emosi bis nntn walid, endingnya kurang puas krna walidnya tidak sengsara",
+        "drakor lama yang underrated tp bagus apa yh"
     ]
 }
 
