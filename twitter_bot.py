@@ -24,11 +24,12 @@ except Exception as e:
     exit()
 
 # 2. Anti-spam System
-def save_log():
+def save_log(today_count, message):
     log = {
         "last_post": datetime.datetime.now().isoformat(),
-        "today_count": today_count + 1,
-        "content": current_message[:50] + "..."
+        "today_count": today_count,
+        "date": datetime.date.today().isoformat(),
+        "content": message[:50] + "..."
     }
     with open('bot_log.json', 'w') as f:
         json.dump(log, f)
@@ -36,15 +37,23 @@ def save_log():
 def load_log():
     try:
         with open('bot_log.json', 'r') as f:
-            return json.load(f)
-    except:
-        return {"last_post": None, "today_count": 0}
+            log = json.load(f)
+            # Convert old format to new format
+            if "date" not in log:
+                log_date = datetime.datetime.fromisoformat(log["last_post"]).date() if log["last_post"] else datetime.date.today()
+                log["date"] = log_date.isoformat()
+            return log
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {
+            "last_post": None,
+            "today_count": 0,
+            "date": datetime.date.today().isoformat()
+        }
 
 # 3. Content Settings
-MAX_DAILY_TWEETS = 8  # Reduced from 10 for safety
-MIN_INTERVAL = datetime.timedelta(minutes=90)  # 1.5 hours minimum
+MAX_DAILY_TWEETS = 8
+MIN_INTERVAL = datetime.timedelta(minutes=90)
 
-# Content Mix (40% promo, 60% organic)
 CONTENT_POOL = {
     "promo": [
         "1READY AMAZON PRIME VIDEO cek bio yaa!",
@@ -69,8 +78,19 @@ SCHEDULE_WINDOW = {
 
 # Main Logic
 log = load_log()
-last_post_time = datetime.datetime.fromisoformat(log["last_post"]) if log["last_post"] else None
-today_count = log["today_count"] if datetime.date.today().isoformat() in log.get("last_post", "") else 0
+current_date = datetime.date.today().isoformat()
+
+# Reset counter if new day
+if log["date"] != current_date:
+    log["today_count"] = 0
+    log["date"] = current_date
+
+last_post_time = (
+    datetime.datetime.fromisoformat(log["last_post"]) 
+    if log["last_post"] 
+    else None
+)
+today_count = log["today_count"]
 
 current_utc = datetime.datetime.utcnow()
 current_wib = current_utc + datetime.timedelta(hours=7)
@@ -84,7 +104,8 @@ if SCHEDULE_WINDOW["start"] <= current_utc.time() <= SCHEDULE_WINDOW["end"]:
         exit()
 
     if last_post_time and (current_utc - last_post_time) < MIN_INTERVAL:
-        print(f"⏳ Menunggu interval... ({(MIN_INTERVAL - (current_utc - last_post_time)).seconds//60} menit lagi)")
+        remaining = (MIN_INTERVAL - (current_utc - last_post_time)).seconds // 60
+        print(f"⏳ Menunggu interval... ({remaining} menit lagi)")
         exit()
 
     # Random delay (5-15 minutes)
@@ -100,9 +121,10 @@ if SCHEDULE_WINDOW["start"] <= current_utc.time() <= SCHEDULE_WINDOW["end"]:
         # Post tweet
         response = client.create_tweet(text=current_message)
         today_count += 1
-        save_log()
+        save_log(today_count, current_message)
         
-        print(f"✅ {'PROMO' if content_type == 'promo' else 'ORGANIC'} terkirim [{current_utc.strftime('%H:%M')} UTC/{current_wib.strftime('%H:%M')} WIB]")
+        print(f"✅ {'PROMO' if content_type == 'promo' else 'ORGANIC'} terkirim")
+        print(f"🕒 [{current_utc.strftime('%H:%M')} UTC/{current_wib.strftime('%H:%M')} WIB]")
         print(f"📝 Konten: {current_message[:60]}...")
         print(f"#️⃣ Tweet {today_count}/{MAX_DAILY_TWEETS} hari ini")
         
@@ -113,7 +135,7 @@ if SCHEDULE_WINDOW["start"] <= current_utc.time() <= SCHEDULE_WINDOW["end"]:
             try:
                 client.create_tweet(text=current_message)
                 today_count += 1
-                save_log()
+                save_log(today_count, current_message)
                 print("✅ Alternatif organik terkirim!")
             except Exception as alt_e:
                 print(f"❌ Gagal alternatif: {alt_e}")
