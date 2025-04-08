@@ -44,20 +44,20 @@ VARIATIONS = {
 
 # ===== JADWAL TWEET (UTC) =====
 TWEET_SCHEDULE = {
-    "05:00": "Selamat siang! Sudah makan siang belum? Jangan lupa istirahat sebentar ya! ☀️",
-    "06:30": "Waktunya ngopi dulu biar semangat lanjut aktivitas! ☕",
-    "08:00": "Selamat sore gaiss! Aktivitas hari ini udah sampai mana nih? 😊",
+    "05:00": "Selamat siang! Sudah makan siang belum? Jangan lupa istirahat sebentar ya!",
+    "06:30": "Waktunya ngopi dulu biar semangat lanjut aktivitas!",
+    "08:00": "Selamat sore gaiss! Aktivitas hari ini udah sampai mana nih?",
     "08:45": "Sore-sore gini enaknya ngapain ya? Ada rekomendasi series atau lagu?",
-    "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini? 🍵",
-    "11:00": "Hai sunset lovers! Udah lihat matahari terbenam hari ini? 💛",
-    "12:45": "Malam minggu nih! Ada yang punya rencana seru malam ini? 🎉",
-    "13:30": "Waktunya dinner! Menu spesial malam ini apa nih? 🥘",
-    "14:50": "Sebelum tidur, yuk refleksiin hari ini! Hal paling berkesan apa? 🌙",
-    "15:00": "Waktunya me-time! Mau nonton apa atau main game apa? 🎮",
-    "16:30": "Halo night owls! Ada yang masih bangun? 😊",
-    "18:00": "Pagi-pagi buta... Ada yang udah bangun buat sahur? 🌙",
-    "19:30": "Buat yang masih terjaga, jangan lupa minum air putih ya! 💧",
-    "20:00": "Off dulu gais, besok lanjut lagi! 💤"
+    "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini?",
+    "11:00": "Hai sunset lovers! Udah lihat matahari terbenam hari ini?",
+    "12:45": "Malam minggu nih! Ada yang punya rencana seru malam ini?",
+    "13:30": "Waktunya dinner! Menu spesial malam ini apa nih?",
+    "14:50": "Sebelum tidur, yuk refleksiin hari ini! Hal paling berkesan apa?",
+    "15:00": "Waktunya me-time! Mau nonton apa atau main game apa?",
+    "16:30": "Halo night owls! Ada yang masih bangun?",
+    "18:00": "Pagi-pagi buta... Ada yang udah bangun buat sahur?",
+    "19:30": "Buat yang masih terjaga, jangan lupa minum air putih ya!",
+    "20:00": "Off dulu gais, besok lanjut lagi!"
 }
 
 # ===== POSTING TWEET =====
@@ -72,10 +72,13 @@ for schedule_time, base_message in TWEET_SCHEDULE.items():
     if (current_time.hour == schedule_hour and 
         (schedule_min - 15) <= current_time.minute <= (schedule_min + 15)):
         
-        # Tambahkan variasi ke pesan
-        message = f"{base_message}{choice(VARIATIONS['greeting']}"
+        # Tambahkan variasi ke pesan (FIXED SYNTAX)
+        selected_emoji = choice(VARIATIONS["greeting"])
+        message = f"{base_message} {selected_emoji}"
+        
         if datetime.datetime.now().weekday() < 5:  # Hari kerja
-            message += choice(VARIATIONS['signature'])
+            selected_sig = choice(VARIATIONS["signature"])
+            message += selected_sig
         
         # Cek duplikat
         if last_time != schedule_time or last_content != message:
@@ -92,7 +95,8 @@ for schedule_time, base_message in TWEET_SCHEDULE.items():
                 print(f"❌ Gagal posting: {str(e)[:100]}...")
                 if "duplicate" in str(e):
                     print("⚠️ Mencoba versi alternatif...")
-                    alt_message = f"{base_message} {choice(VARIATIONS['greeting'])}"
+                    alt_emoji = choice([e for e in VARIATIONS["greeting"] if e != selected_emoji])
+                    alt_message = f"{base_message} {alt_emoji}"
                     try:
                         client.create_tweet(text=alt_message)
                         save_last_post(schedule_time, alt_message)
