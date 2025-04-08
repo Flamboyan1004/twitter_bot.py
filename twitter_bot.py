@@ -2,13 +2,14 @@ import tweepy
 import os
 import datetime
 import json
-from random import choice
+from random import choice, randint
+import time
 
-print("\n=== BOT TWITTER DIMULAI ===")
+print("\n=== BOT TWITTER AMAN ===")
 print("UTC:", datetime.datetime.utcnow().strftime("%H:%M"))
 print("WIB:", (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%H:%M"))
 
-# Autentikasi
+# 1. Authentication
 try:
     client = tweepy.Client(
         consumer_key=os.environ["API_KEY"],
@@ -22,72 +23,102 @@ except Exception as e:
     print(f"❌ Gagal login: {e}")
     exit()
 
-# Anti duplikat
-def save_post(time, content):
-    with open('last_post.json', 'w') as f:
-        json.dump({"time": time, "content": content}, f)
+# 2. Anti-spam System
+def save_log():
+    log = {
+        "last_post": datetime.datetime.now().isoformat(),
+        "today_count": today_count + 1,
+        "content": current_message[:50] + "..."
+    }
+    with open('bot_log.json', 'w') as f:
+        json.dump(log, f)
 
-def load_post():
+def load_log():
     try:
-        with open('last_post.json', 'r') as f:
-            data = json.load(f)
-            return data["time"], data["content"]
+        with open('bot_log.json', 'r') as f:
+            return json.load(f)
     except:
-        return None, None
+        return {"last_post": None, "today_count": 0}
 
-# Variasi pesan
-EMOJI = ["✨", "🌸", "💫", "🌙", "☀️"]
-PROMOSI = [
-    " cek pricelist di bio yaa!",
-    " ready akun murah lohh",
-    " kami ridii akun premium!",
-    " cek WA di bio untuk info lengkap"
-]
+# 3. Content Settings
+MAX_DAILY_TWEETS = 8  # Reduced from 10 for safety
+MIN_INTERVAL = datetime.timedelta(minutes=90)  # 1.5 hours minimum
 
-# Jadwal UTC (WIB = UTC+7) dengan konten promosi
-JADWAL = {
-    "05:00": "1READY AMAZON PRIME VIDEO" + choice(PROMOSI),
-    "06:30": "Selamat siang! Sudah makan siang belum? aku READY NETFLIX lohh" + choice(PROMOSI),
-    "08:00": "Sore-sore enaknya ngapain ya? nonton viu ga sii?" + choice(PROMOSI),
-    "08:45": "Menu makan malam apa hari ini? makan sambil nonton iqiyi" + choice(PROMOSI),
-    "09:15": "Bosen nonton netplixx? move ke vidio keknya seruu" + choice(PROMOSI),
-    "11:00": "Malam minggu nih! Nonton Disney+ Hotstar yuk!" + choice(PROMOSI),
-    "12:45": "1READY HBO GO lengkap semua season!" + choice(PROMOSI),
-    "13:30": "Waktunya me-time! Mau nonton apa nih? Kami ready semua platform loh" + choice(PROMOSI),
-    "14:50": "Sebelum tidur nonton dulu yuk! Ada yang mau coba MOLA TV?" + choice(PROMOSI),
-    "15:00": "1READY WE TV UNTUK DRAMA LOVERSS!" + choice(PROMOSI),
-    "16:30": "Masih bangun nih? Yuk nonton U-NEXT biar ga ngantuk!" + choice(PROMOSI),
-    "18:00": "1READY APPLE TV+ FILM BARU TERUS!" + choice(PROMOSI),
-    "19:30": "Jangan lupa istirahat! Sambil nonton Crunchyroll yuk!" + choice(PROMOSI),
-    "20:00": "Off dulu gais! Pesan akun bisa via WA di bio ya!"
+# Content Mix (40% promo, 60% organic)
+CONTENT_POOL = {
+    "promo": [
+        "1READY AMAZON PRIME VIDEO cek bio yaa!",
+        "Nonton Netflix lebih hemat, aku ready! 🌸",
+        "Butuh akun Viu Premium? DM aja! ✨",
+        "Ada promo khusus hari ini cek WA di bio"
+    ],
+    "organic": [
+        "Sore-sore enaknya nonton apa nih? Ada rekomendasi?",
+        "Yang lagi WFH, break dulu yuk! Lagi ngopi sambil nonton apa?",
+        "Film terakhir yang bikin kamu terharu apa?",
+        "Recommend drama Korea terbaik dong!",
+        "Ngabuburitnya sambil nonton apa nih?"
+    ]
 }
 
-# Proses posting
-waktu_sekarang = datetime.datetime.utcnow()
-terposting = False
-waktu_terakhir, konten_terakhir = load_post()
+# 4. Time Settings (WIB 12:00-03:00 → UTC 05:00-20:00)
+SCHEDULE_WINDOW = {
+    "start": datetime.time(5, 0),   # 12:00 WIB
+    "end": datetime.time(20, 0)     # 03:00 WIB
+}
 
-for jadwal, pesan in JADWAL.items():
-    jam, menit = map(int, jadwal.split(":"))
+# Main Logic
+log = load_log()
+last_post_time = datetime.datetime.fromisoformat(log["last_post"]) if log["last_post"] else None
+today_count = log["today_count"] if datetime.date.today().isoformat() in log.get("last_post", "") else 0
+
+current_utc = datetime.datetime.utcnow()
+current_wib = current_utc + datetime.timedelta(hours=7)
+
+# Check if within operational hours
+if SCHEDULE_WINDOW["start"] <= current_utc.time() <= SCHEDULE_WINDOW["end"]:
     
-    if (waktu_sekarang.hour == jam and 
-        abs(waktu_sekarang.minute - menit) <= 7):
-        
-        pesan_baru = f"{pesan} {choice(EMOJI)}"
-        
-        if waktu_terakhir != jadwal or konten_terakhir != pesan_baru:
-            try:
-                client.create_tweet(text=pesan_baru)
-                save_post(jadwal, pesan_baru)
-                waktu_wib = (datetime.datetime.strptime(jadwal, "%H:%M") + 
-                            datetime.timedelta(hours=7)).strftime("%H:%M")
-                print(f"✅ Berhasil posting [{jadwal} UTC/{waktu_wib} WIB]")
-                print(f"📝 Isi: {pesan_baru[:60]}...")
-                terposting = True
-                break
-            except Exception as e:
-                print(f"❌ Gagal: {str(e)[:100]}")
+    # Check limits
+    if today_count >= MAX_DAILY_TWEETS:
+        print(f"⛔ Batas harian ({MAX_DAILY_TWEETS} tweet) tercapai")
+        exit()
 
-if not terposting:
-    waktu_wib = (waktu_sekarang + datetime.timedelta(hours=7)).strftime("%H:%M")
-    print(f"⏳ Tidak ada jadwal (UTC: {waktu_sekarang.strftime('%H:%M')} | WIB: {waktu_wib})")
+    if last_post_time and (current_utc - last_post_time) < MIN_INTERVAL:
+        print(f"⏳ Menunggu interval... ({(MIN_INTERVAL - (current_utc - last_post_time)).seconds//60} menit lagi)")
+        exit()
+
+    # Random delay (5-15 minutes)
+    delay = randint(300, 900)
+    print(f"⏲️ Menambah delay acak {delay//60} menit...")
+    time.sleep(delay)
+
+    # Select content (40% promo chance)
+    content_type = "promo" if randint(1, 10) <= 4 else "organic"
+    current_message = choice(CONTENT_POOL[content_type])
+    
+    try:
+        # Post tweet
+        response = client.create_tweet(text=current_message)
+        today_count += 1
+        save_log()
+        
+        print(f"✅ {'PROMO' if content_type == 'promo' else 'ORGANIC'} terkirim [{current_utc.strftime('%H:%M')} UTC/{current_wib.strftime('%H:%M')} WIB]")
+        print(f"📝 Konten: {current_message[:60]}...")
+        print(f"#️⃣ Tweet {today_count}/{MAX_DAILY_TWEETS} hari ini")
+        
+    except tweepy.TweepyException as e:
+        if "duplicate" in str(e).lower():
+            print("⚠️ Konten duplikat, mencoba alternatif...")
+            current_message = choice([msg for msg in CONTENT_POOL["organic"] if msg != current_message])
+            try:
+                client.create_tweet(text=current_message)
+                today_count += 1
+                save_log()
+                print("✅ Alternatif organik terkirim!")
+            except Exception as alt_e:
+                print(f"❌ Gagal alternatif: {alt_e}")
+        else:
+            print(f"❌ Error posting: {str(e)[:100]}")
+
+else:
+    print(f"🌙 Di luar jam operasional (12:00-03:00 WIB)")
