@@ -68,17 +68,17 @@ last_time, last_content = load_last_post()
 for schedule_time, base_message in TWEET_SCHEDULE.items():
     schedule_hour, schedule_min = map(int, schedule_time.split(":"))
     
-    # Cek waktu dengan toleransi 15 menit
+    # Cek waktu dengan toleransi 15 menit (sesuai cron job)
     if (current_time.hour == schedule_hour and 
-        (schedule_min - 15) <= current_time.minute <= (schedule_min + 15)):
+        (schedule_min - 7) <= current_time.minute <= (schedule_min + 7)):
         
-        # Tambahkan variasi ke pesan (FIXED SYNTAX)
-        selected_emoji = choice(VARIATIONS["greeting"])
-        message = f"{base_message} {selected_emoji}"
+        # Buat pesan dengan variasi
+        emoji = choice(VARIATIONS["greeting"])
+        message = f"{base_message} {emoji}"
         
-        if datetime.datetime.now().weekday() < 5:  # Hari kerja
-            selected_sig = choice(VARIATIONS["signature"])
-            message += selected_sig
+        # Tambahkan signature di hari kerja
+        if datetime.datetime.utcnow().weekday() < 5:
+            message += choice(VARIATIONS["signature"])
         
         # Cek duplikat
         if last_time != schedule_time or last_content != message:
@@ -86,7 +86,7 @@ for schedule_time, base_message in TWEET_SCHEDULE.items():
                 response = client.create_tweet(text=message)
                 save_last_post(schedule_time, message)
                 wib_time = (datetime.datetime.strptime(schedule_time, "%H:%M") + 
-                           datetime.timedelta(hours=7)).strftime("%H:%M")
+                          datetime.timedelta(hours=7)).strftime("%H:%M")
                 print(f"✅ Tweet terkirim [{schedule_time} UTC/{wib_time} WIB]")
                 print(f"📝 Konten: {message[:60]}...")
                 posted = True
@@ -95,8 +95,8 @@ for schedule_time, base_message in TWEET_SCHEDULE.items():
                 print(f"❌ Gagal posting: {str(e)[:100]}...")
                 if "duplicate" in str(e):
                     print("⚠️ Mencoba versi alternatif...")
-                    alt_emoji = choice([e for e in VARIATIONS["greeting"] if e != selected_emoji])
-                    alt_message = f"{base_message} {alt_emoji}"
+                    new_emoji = choice([e for e in VARIATIONS["greeting"] if e != emoji])
+                    alt_message = f"{base_message} {new_emoji}"
                     try:
                         client.create_tweet(text=alt_message)
                         save_last_post(schedule_time, alt_message)
