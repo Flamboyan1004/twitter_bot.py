@@ -65,7 +65,7 @@ CONTENT_POOL = {
         "kalian kalo lagi break biasanya ngapain",
         "kalian lagi nonton apaa best?",
         "Spill Film terakhir yang bikin terharu",
-        "aku emosi bis nntn walid, endingnya kurang puas krna walidnya tidak sengsara",
+        "openress gais",
         "drakor lama yang underrated tp bagus apa yh"
     ]
 }
