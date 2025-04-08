@@ -37,11 +37,11 @@ def load_last_post():
 # ===== JADWAL TWEET (UTC) DENGAN KONVERSI WIB =====
 TWEET_SCHEDULE = {
     # Format: "UTC_TIME": "message"  # WIB_TIME (UTC+7)
-    "05:00": "Selamat siang! Sudah makan siang belum nih? Jangan lupa istirahat sebentar ya! ☀️ #LunchTime" aku ready akun prem lohh cek bioo yaa!!!,  # 12:00 WIB
-    "06:30": "ready akun prem dan open ress! ☕ Siapa yang lagi WFH hari ini?",  # 13:30 WIB
+    "05:00": "Selamat siang! Sudah makan siang belum nih? Jangan lupa istirahat sebentar ya! ☀️ Aku ready akun prem lohh, cek bio yaa!!! #LunchTime",  # 12:00 WIB
+    "06:30": "Waktunya ngopi dulu biar semangat lanjut aktivitas! ☕ Siapa yang lagi WFH hari ini?",  # 13:30 WIB
     "08:00": "Selamat sore gaiss! Aktivitas hari ini udah sampai mana nih? 😊",  # 15:00 WIB
     "08:45": "Sore-sore gini enaknya ngapain ya? Ada yang mau rekomendasiin series atau lagu?",  # 15:45 WIB
-    "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini? �",  # 16:15 WIB
+    "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini? 🍵",  # 16:15 WIB
     "15:00": "Waktunya me-time! Malam ini ada yang mau nonton apa atau main game apa? 🎮🍿",  # 22:00 WIB
     "16:30": "Halo night owls! Ada yang masih bangun? Aku open order sampai jam 3 pagi nih 😊",  # 23:30 WIB
     "18:00": "Pagi-pagi buta yang sepi... Ada yang udah bangun buat sahur atau kerja shift malam? 🌙",  # 01:00 WIB
