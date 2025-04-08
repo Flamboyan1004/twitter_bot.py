@@ -2,12 +2,13 @@ name: Twitter Bot Scheduler
 
 on:
   schedule:
-    - cron: '*/20 6-17 * * *'  # Run every 20 minutes from 06:00-17:59 UTC
-  workflow_dispatch:
+    - cron: '0,20,40 6-17 * * *'  # Run at :00, :20, :40 from 06:00-17:59 UTC
+  workflow_dispatch:  # Allow manual triggers
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 5  # Prevent hanging
     
     steps:
     - uses: actions/checkout@v3
@@ -18,7 +19,9 @@ jobs:
         python-version: '3.10'
     
     - name: Install dependencies
-      run: pip install tweepy
+      run: |
+        pip install tweepy
+        sudo apt-get install -y python3.10-venv
     
     - name: Run Twitter Bot
       env:
@@ -26,4 +29,16 @@ jobs:
         API_SECRET: ${{ secrets.API_SECRET }}
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-      run: python twitter_bot.py
+      run: |
+        # Create persistent last_post.json between runs
+        if [ -f last_post.json ]; then
+          echo "Restoring previous post state..."
+          cp last_post.json /tmp/
+        fi
+        
+        python twitter_bot.py
+        
+        if [ -f /tmp/last_post.json ]; then
+          echo "Saving post state for next run..."
+          cp /tmp/last_post.json .
+        fi
