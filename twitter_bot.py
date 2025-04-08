@@ -36,14 +36,11 @@ def load_last_post():
 # ===== JADWAL TWEET (UTC) =====
 TWEET_SCHEDULE = {
     # Waktu UTC (WIB = UTC+7)
-    "16:00": "OPEN RESELLER! Halo, kak! FH saya open dari 07.00 - 03.00 subuh, ada 3 admin fsr, aplikasi 70+ dan garansi mostly 0-1d! bisa kepoin pl nya dulu🤍feel free to ask buat ress baru! last, no fee no target! bisa tanya ke twt @xiaojdun atau untuk fsr ke WA di bio @xiaojdun yaa",  # 23:00 WIB
-    "16:30": "4. Aku onn",                                                         # 23:30 WIB
-    "17:00": "1. OPEN RESELLER! 🌟 Buka 07.00-03.00 WIB",                          # 00:00 WIB
-    "17:30": "5. Bismillah 🤲 Sehat & rezeki melimpah ✨",                          # 00:30 WIB
-    "18:00": "2. OPEN RESELLER! 🚀 Free konsultasi",                               # 01:00 WIB
-    "19:30": "3. Aku open ress",                                                   # 02:30 WIB
-    "20:00": "off dulss gaiss",                                                    # 03:00 WIB
-    "21:00": "OPEN RESELLER! Halo, kak! FH saya open dari 07.00 - 03.00 subuh, ada 3 admin fsr, aplikasi 70+ dan garansi mostly 0-1d! bisa kepoin pl nya dulu🤍feel free to ask buat ress baru! last, no fee no target! bisa tanya ke twt @xiaojdun atau untuk fsr ke WA di bio @xiaojdun yaa"  # 04:00 WIB
+    "06:30": "aku on ya gaiss, yang mau order apk premm ridii, cek di bioo",          # 13:30 WIB
+    "08:00": "selamat sore semuaa udah nonton netflix belum?",                        # 15:00 WIB
+    "10:00": "aku open ress, dm untuk cek harga ya gaiss",                            # 17:00 WIB
+    "16:00": "selamat malam, ngapain ajaa ga tidurr nii?",                           # 23:00 WIB
+    "17:00": "playlist ada di link bio akuu yaa, murcee bangett koo"                  # 00:00 WIB
 }
 
 # ===== POSTING TWEET =====
