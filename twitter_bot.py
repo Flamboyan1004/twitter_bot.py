@@ -44,18 +44,18 @@ VARIATIONS = {
 
 # ===== JADWAL TWEET (UTC) =====
 TWEET_SCHEDULE = {
-    "05:00": "Selamat siang! Sudah makan siang belum? Jangan lupa istirahat sebentar ya!",
-    "06:30": "Waktunya ngopi dulu biar semangat lanjut aktivitas!",
+    "05:00": "aku dah on gaiss",
+    "06:30": "☁✨ READY IQIYI! ✨☁ 🌸 ANTILIMIT﹒♡ 1 Bulan – 20K 🎀 wa.me/6287782310040 🎀 🌷",
     "08:00": "Selamat sore gaiss! Aktivitas hari ini udah sampai mana nih?",
     "08:45": "Sore-sore gini enaknya ngapain ya? Ada rekomendasi series atau lagu?",
     "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini?",
     "11:00": "Hai sunset lovers! Udah lihat matahari terbenam hari ini?",
-    "12:45": "Malam minggu nih! Ada yang punya rencana seru malam ini?",
+    "12:45": "☁✨ READY VIDIO! ✨☁ 🌷 Platinum Private﹒♡ 1 Bulan – 28K 🎀 wa.me/6287782310040 🎀🌷",
     "13:30": "Waktunya dinner! Menu spesial malam ini apa nih?",
-    "14:50": "Sebelum tidur, yuk refleksiin hari ini! Hal paling berkesan apa?",
+    "14:50": "Sebelum tidur, ☁✨ READY AMAZON PRIME VIDEO! ✨☁ mulai dari 8k",
     "15:00": "Waktunya me-time! Mau nonton apa atau main game apa?",
-    "16:30": "Halo night owls! Ada yang masih bangun?",
-    "18:00": "Pagi-pagi buta... Ada yang udah bangun buat sahur?",
+    "16:30": "☁✨ READY WETV! ✨☁ 🌷 Sharing﹒♡ 1 Bulan – 12K 🎀 wa.me/6287782310040 🎀🌷",
+    "18:00": "Pagi-pagi buta... ☁✨ READY NETFLIXX! ✨☁ mulai dari 10k",
     "19:30": "Buat yang masih terjaga, jangan lupa minum air putih ya!",
     "20:00": "Off dulu gais, besok lanjut lagi!"
 }
