@@ -2,23 +2,26 @@ name: Twitter Bot Scheduler
 
 on:
   schedule:
-    - cron: '0,20,40 6-17 * * *'
+    - cron: '0,20,40 6-17 * * *'  # Tetap sama
   workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Ditambah untuk handle rate limit
     
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up Python 3.12
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version: '3.10'  # Lebih kompatibel dengan tweepy OAuth1
     
     - name: Install dependencies
-      run: pip install tweepy
+      run: |
+        pip install tweepy==4.14.0  # Versi stabil untuk API v1.1
+        pip install python-dotenv  # Untuk handle env vars jika perlu
     
     - name: Run Twitter Bot
       env:
