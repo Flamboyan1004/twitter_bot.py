@@ -2,21 +2,20 @@ name: Twitter Bot Scheduler
 
 on:
   schedule:
-    # Check every 30 minutes between 06:00-17:30 UTC (covers all tweet times with buffer)
-    - cron: '*/30 6-17 * * *'
-  workflow_dispatch:  # Untuk trigger manual
+    - cron: '*/20 6-17 * * *'  # Run every 20 minutes from 06:00-17:59 UTC
+  workflow_dispatch:
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.10'
     
     - name: Install dependencies
       run: pip install tweepy
