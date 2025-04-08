@@ -2,85 +2,76 @@ import tweepy
 import os
 import datetime
 import json
-import time
-import random
 
-print("\n=== TWITTER BOT STARTED ===")
+# ===== KONFIGURASI =====
+print("\n=== BOT TWITTER DIMULAI ===")
 print("UTC Time:", datetime.datetime.utcnow().strftime("%H:%M"))
+print("WIB Time:", (datetime.datetime.utcnow() + datetime.timedelta(hours=7)).strftime("%H:%M"))
 
-# Gunakan API v1.1 dengan OAuth1
+# 1. Autentikasi
 try:
-    auth = tweepy.OAuth1UserHandler(
+    client = tweepy.Client(
         consumer_key=os.environ["API_KEY"],
         consumer_secret=os.environ["API_SECRET"],
         access_token=os.environ["ACCESS_TOKEN"],
         access_token_secret=os.environ["ACCESS_TOKEN_SECRET"]
     )
-    client = tweepy.API(auth, wait_on_rate_limit=True)
-    
-    # Verifikasi kredensial
-    try:
-        user = client.verify_credentials()
-        print(f"🔑 Connected as @{user.screen_name}")
-    except tweepy.TweepyException as e:
-        print(f"❌ Credential verification failed: {str(e)}")
-        if "Unauthorized" in str(e):
-            print("⚠️ Please check your API keys and permissions")
-        exit()
-
+    user = client.get_me()
+    print(f"🔑 Terhubung ke Twitter sebagai @{user.data.username}")
 except Exception as e:
-    print(f"❌ Authentication failed: {str(e)}")
+    print(f"❌ Gagal koneksi: {e}")
     exit()
 
-# ... (bagian state management tetap sama)
+# ===== FUNGSI ANTI DUPLIKASI =====
+def save_last_post(time_key):
+    with open('last_post.json', 'w') as f:
+        json.dump({"last_post": time_key}, f)
 
-# Tweet schedule (UTC)
+def load_last_post():
+    try:
+        with open('last_post.json', 'r') as f:
+            return json.load(f).get("last_post")
+    except:
+        return None
+
+# ===== JADWAL TWEET (UTC) DENGAN KONVERSI WIB =====
 TWEET_SCHEDULE = {
-    "06:30": "aku on ya gaiss, yang mau order apk premm ridii, cek di bioo",
-    "08:00": "selamat sore semuaa udah nonton netflix belum?",
-    "10:00": "aku open ress, dm untuk cek harga ya gaiss",
-    "16:00": "selamat malam, ngapain ajaa ga tidurr nii?",
-    "17:00": "playlist ada di link bio akuu yaa, murcee bangett koo"
+    # Format: "UTC_TIME": "message"  # WIB_TIME (UTC+7)
+    "05:00": "Selamat siang! Sudah makan siang belum nih? Jangan lupa istirahat sebentar ya! ☀️ #LunchTime" aku ready akun prem lohh cek bioo yaa!!!,  # 12:00 WIB
+    "06:30": "ready akun prem dan open ress! ☕ Siapa yang lagi WFH hari ini?",  # 13:30 WIB
+    "08:00": "Selamat sore gaiss! Aktivitas hari ini udah sampai mana nih? 😊",  # 15:00 WIB
+    "08:45": "Sore-sore gini enaknya ngapain ya? Ada yang mau rekomendasiin series atau lagu?",  # 15:45 WIB
+    "09:15": "Ngabuburit online yuk! Ada yang mau cerita aktivitas hari ini? �",  # 16:15 WIB
+    "15:00": "Waktunya me-time! Malam ini ada yang mau nonton apa atau main game apa? 🎮🍿",  # 22:00 WIB
+    "16:30": "Halo night owls! Ada yang masih bangun? Aku open order sampai jam 3 pagi nih 😊",  # 23:30 WIB
+    "18:00": "Pagi-pagi buta yang sepi... Ada yang udah bangun buat sahur atau kerja shift malam? 🌙",  # 01:00 WIB
+    "19:30": "Buat yang masih terjaga, jangan lupa minum air putih ya! 💧",  # 02:30 WIB
+    "20:00": "Off dulu gais, besok lanjut lagi! 💤"  # 03:00 WIB
 }
 
+# ===== POSTING TWEET =====
 current_time = datetime.datetime.utcnow()
-state = load_state()
 posted = False
+last_post = load_last_post()
 
 for schedule_time, message in TWEET_SCHEDULE.items():
     schedule_hour, schedule_min = map(int, schedule_time.split(":"))
     
-    time_match = (
-        current_time.hour == schedule_hour and 
-        (schedule_min - 15) <= current_time.minute <= (schedule_min + 20)
-    )
-    
-    if time_match and state.get("last_post") != schedule_time:
-        try:
-            delay = random.randint(10, 60)
-            print(f"⏳ Waiting {delay}s before posting...")
-            time.sleep(delay)
-            
-            # Gunakan API v1.1 untuk posting
-            tweet = client.update_status(status=message)
-            save_state(schedule_time)
-            print(f"✅ Tweet posted: https://twitter.com/{user.screen_name}/status/{tweet.id}")
-            posted = True
-            
-        except tweepy.TweepyException as e:
-            error_msg = f"❌ Twitter API error: {str(e)}"
-            print(error_msg)
-            save_state(state["last_post"], error_msg)
-            
-            if "Too Many Requests" in str(e):
-                print("🔄 Waiting 15 minutes due to rate limit...")
-                time.sleep(900)
-            elif "Forbidden" in str(e):
-                print("⚠️ Please check your app permissions in Twitter Developer Portal")
-                
-        except Exception as e:
-            error_msg = f"⚠️ Unexpected error: {str(e)}"
-            print(error_msg)
-            save_state(state["last_post"], error_msg)
+    # Cek waktu dengan toleransi 15 menit sebelum - 20 menit setelah
+    if (current_time.hour == schedule_hour and 
+        (schedule_min - 15) <= current_time.minute <= (schedule_min + 20)):
+        
+        # Cek apakah sudah pernah diposting
+        if last_post != schedule_time:
+            try:
+                response = client.create_tweet(text=message)
+                save_last_post(schedule_time)
+                wib_time = (datetime.datetime.strptime(schedule_time, "%H:%M") + datetime.timedelta(hours=7)).strftime("%H:%M")
+                print(f"✅ Tweet terkirim [{schedule_time} UTC / {wib_time} WIB]: https://twitter.com/user/status/{response.data['id']}")
+                posted = True
+            except Exception as e:
+                print(f"❌ Gagal posting: {e}")
 
-# ... (bagian status report tetap sama)
+if not posted:
+    current_wib = (current_time + datetime.timedelta(hours=7)).strftime("%H:%M")
+    print(f"⏳ Tidak ada jadwal (UTC: {current_time.strftime('%H:%M')} | WIB: {current_wib})")
